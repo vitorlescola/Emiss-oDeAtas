@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de ata</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .required::after {
+            content: "*";
+            color: red;
+            margin-left: 5px;
+        }
+        .error {
+            color: red;
+            font-size: 0.875em;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Formulário de ata</h1>
+
+    <form id="ataForm">
+        <table>
+            <tr>
+                <th><label for="inicio" class="required">Início</label></th>
+                <td><input type="date" id="inicio" name="inicio" required></td>
+            </tr>
+            <tr>
+                <th><label for="fim" class="required">Fim</label></th>
+                <td><input type="date" id="fim" name="fim" required></td>
+            </tr>
+            <tr>
+                <th><label for="setor" class="required">Setor</label></th>
+                <td>
+                    <select id="setor" name="setor" required>
+                        <option value="" disabled selected>Selecione um setor</option>
+                        <option value="financeiro">Almoxarifado</option>
+                        <option value="recursos_humanos">Contabilidade</option>
+                        <option value="tecnologia">Financeiro</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="titulo" class="required">Título</label></th>
+                <td><input type="text" id="titulo" name="titulo" required></td>
+            </tr>
+            <tr>
+                <th><label for="pauta" class="required">Pauta</label></th>
+                <td><input type="text" id="pauta" name="pauta" required></td>
+            </tr>
+            <tr>
+                <th><label for="descricao" class="required">Descrição</label></th>
+                <td><textarea id="descricao" name="descricao" rows="4" required></textarea></td>
+            </tr>
+            <tr>
+                <th><label for="tipo" class="required">Tipo</label></th>
+                <td><input type="text" id="tipo" name="tipo" required></td>
+            </tr>
+            <tr>
+                <th><label for="palavras-chave" class="required">Palavras-chave</label></th>
+                <td>
+                    <input type="text" id="palavras-chave" name="palavras-chave" required>
+                    <div id="palavras-chave-error" class="error"></div>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="membro-externo">Membro Externo</label></th>
+                <td><input type="text" id="membro-externo" name="membro-externo"></td>
+            </tr>
+            <tr>
+                <th><label for="matricula" class="required">Matrícula</label></th>
+                <td><input type="text" id="matricula" name="matricula" required></td>
+            </tr>
+        </table>
+        <br>
+        <button type="submit">Salvar</button>
+    </form>
+    
+    <script>
+        document.getElementById('ataForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const palavrasChavesInput = document.getElementById('palavras-chave');
+            const palavrasChavesError = document.getElementById('palavras-chave-error');
+            const palavrasChaves = palavrasChavesInput.value.trim().split(/\s+/);
+            
+            palavrasChavesError.textContent = '';
+
+            if (palavrasChaves.length > 5) {
+                palavrasChavesError.textContent = 'O campo "Palavras-chave" deve conter no máximo 5 palavras.';
+                return;
+            }
+
+            const formData = new FormData(this);
+            const ata = {
+                titulo: formData.get('titulo'),
+                inicio: formData.get('inicio'),
+                termino: formData.get('fim'),
+                pauta: formData.get('pauta'),
+                descricao: formData.get('descricao'),
+                palavrasChaves: formData.get('palavras-chave'),
+                tipo: formData.get('tipo'),
+                status: "pendente",
+                membroExterno: formData.get('membro-externo'),
+                matricula: formData.get('matricula')
+            };
+
+            fetch('/api/atas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(ata)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Ata salva com sucesso!');
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao salvar ata.');
+            });
+        });
+    </script>
+</body>
+</html>
